@@ -90,9 +90,10 @@
             git
             lldb
             nixfmt-tree
-            # pre-commit
+            postgresql
+            pre-commit
           ];
-          # shellHook = "pre-commit install";
+          shellHook = "pre-commit install";
           RUST_BACKTRACE = 1;
           NIX_ENFORCE_NO_NATIVE = 0;
         };
