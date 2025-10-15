@@ -43,8 +43,8 @@ rpath = true
 # rustflags = ["-C", "target-cpu=native"]
 
 [dependencies]
-axum = "0.8.6"
-sqlx = { version = "0.8.6", features = ["runtime-tokio"] }
+axum = "0.8"
+sqlx = { version = "0.8", features = ["runtime-tokio"] }
 
 # https://doc.rust-lang.org/rustc/lints/listing/index.html
 # TODO: More lints
