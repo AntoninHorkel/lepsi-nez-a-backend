@@ -1,7 +1,26 @@
-target
-result
+# Rust
+target/
+Cargo.lock
+*.rs.bk
+*.pdb
 
+# Nix
+result/
 
-# Added by cargo
+# Environment
+.env
 
-/target
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+*.db
+*.sqlite

@@ -16,15 +16,6 @@ pub struct CreateQuiz {
     pub name: String,
 }
 
-// Answer structure for JSONB field
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Answer {
-    pub key: String,
-    #[serde(rename = "isCorrect")]
-    pub is_correct: bool,
-    pub content: String,
-}
-
 // Question model
 #[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow)]
 pub struct Question {
@@ -36,13 +27,6 @@ pub struct Question {
     pub updated_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct CreateQuestion {
-    pub quiz_id: i32,
-    pub q: String,
-    pub answers: Vec<Answer>,
-}
-
 // QuizInstance model
 #[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow)]
 pub struct QuizInstance {
@@ -50,11 +34,6 @@ pub struct QuizInstance {
     pub uuid: Uuid,
     pub quiz_id: i32,
     pub created_at: DateTime<Utc>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct CreateQuizInstance {
-    pub quiz_id: i32,
 }
 
 // TeamAnswer model
@@ -68,10 +47,30 @@ pub struct TeamAnswer {
     pub created_at: DateTime<Utc>,
 }
 
+// Additional types for API responses
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct CreateTeamAnswer {
-    pub num: i32,
-    pub ans: String,
+pub struct QuizWithQuestions {
+    pub quiz: Quiz,
+    pub questions: Vec<Question>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct QuizInstanceDetail {
+    pub instance: QuizInstance,
+    pub quiz: Quiz,
+    pub questions: Vec<Question>,
+    pub team_answers: Vec<TeamAnswer>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SubmitAnswer {
+    pub team_id: i32,
     pub question_id: i32,
-    pub quiz_instance_id: i32,
+    pub ans: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UpdateInstanceState {
+    pub state: String,
 }

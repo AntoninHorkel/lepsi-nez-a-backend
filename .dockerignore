@@ -1,13 +1,36 @@
+# Build artifacts
 target/
 result/
+
+# Git
 .git/
 .gitignore
+
+# Documentation
 *.md
+docs/
+
+# Environment
 .env
 .env.*
 !.env.example
+
+# Docker files
 Dockerfile
 .dockerignore
 docker-compose.yml
+
+# Nix
 flake.nix
 flake.lock
+
+# Scripts
+*.sh
+
+# Config
+.cargo/
+.pre-commit-config.yaml
+taplo.toml
+
+# Assets (if not needed in container)
+assets/

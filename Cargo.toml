@@ -2,14 +2,13 @@
 [package]
 name = "lepsi-nez-a-backend"
 version = "0.1.0"
-# authors = []
 edition = "2024"
-# description = ""
+description = "Quiz backend API built with Axum and PostgreSQL"
 readme = "README.md"
 repository = "https://github.com/AntoninHorkel/lepsi-nez-a-backend"
-# license = "MIT OR Apache-2.0"
-# keywords = []
-# categories = [] # https://crates.io/category_slugs
+license = "MIT OR Apache-2.0"
+keywords = ["axum", "quiz", "backend", "api", "postgres"]
+categories = ["web-programming"]
 exclude = ["target/", "result/"]
 
 [profile.dev]

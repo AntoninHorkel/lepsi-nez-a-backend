@@ -2,7 +2,7 @@ use axum::{
     extract::State,
     http::StatusCode,
     response::IntoResponse,
-    routing::get,
+    routing::{delete, get, post},
     Json, Router,
 };
 use serde::{Deserialize, Serialize};
@@ -14,7 +14,7 @@ use tower_http::trace::TraceLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 mod models;
-use models::*;
+mod handlers;
 
 // Application state
 #[derive(Clone)]
@@ -60,10 +60,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Build router
     let app = Router::new()
+        // Basic routes
         .route("/", get(root))
         .route("/health", get(health_check))
-        .route("/api/quizzes", get(get_quizzes))
-        .route("/api/questions/:quiz_id", get(get_questions))
+        
+        // Quiz routes
+        .route("/quiz", post(handlers::create_quiz))
+        .route("/quiz", get(handlers::get_all_quizzes))
+        .route("/quiz/:id", get(handlers::get_quiz))
+        .route("/quiz/:id", post(handlers::update_quiz))
+        .route("/quiz/:id", delete(handlers::delete_quiz))
+        .route("/quiz/:id/instance", post(handlers::create_instance))
+        
+        // Quiz Instance routes
+        .route("/quiz/instance/:instanceId", get(handlers::get_instance))
+        .route("/quiz/instance/:instanceId", delete(handlers::delete_instance))
+        .route("/quiz/instance/:instanceId/state", post(handlers::update_instance_state))
+        .route("/quiz/instance/:instanceId/answer", post(handlers::post_answer))
+        
         .with_state(state)
         .layer(TraceLayer::new_for_http());
 
@@ -134,40 +148,4 @@ async fn shutdown_signal() {
     }
 
     tracing::info!("Signal received, starting graceful shutdown");
-}
-
-// API Handlers
-
-// Get all quizzes
-async fn get_quizzes(State(state): State<AppState>) -> impl IntoResponse {
-    match sqlx::query_as::<_, Quiz>("SELECT * FROM quiz ORDER BY created_at DESC")
-        .fetch_all(&state.db)
-        .await
-    {
-        Ok(quizzes) => (StatusCode::OK, Json(quizzes)),
-        Err(e) => {
-            tracing::error!("Failed to fetch quizzes: {}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR, Json(vec![]))
-        }
-    }
-}
-
-// Get questions for a quiz
-async fn get_questions(
-    State(state): State<AppState>,
-    axum::extract::Path(quiz_id): axum::extract::Path<i32>,
-) -> impl IntoResponse {
-    match sqlx::query_as::<_, Question>(
-        "SELECT * FROM question WHERE quiz_id = $1 ORDER BY id"
-    )
-    .bind(quiz_id)
-    .fetch_all(&state.db)
-    .await
-    {
-        Ok(questions) => (StatusCode::OK, Json(questions)),
-        Err(e) => {
-            tracing::error!("Failed to fetch questions: {}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR, Json(vec![]))
-        }
-    }
 }
