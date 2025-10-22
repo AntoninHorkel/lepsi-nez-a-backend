@@ -16,10 +16,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let router = Router::new()
         .route("/quiz", routing::post(create_quiz).get(get_all_quizzes))
         .route("/quiz/:quiz_id", routing::get(get_quiz).post(update_quiz).delete(delete_quiz))
-        .route("/quiz/:quiz_id/create_instance", routing::post(create_instance))
-        .route("/instance/:instance_id", routing::get(get_instance).delete(delete_instance))
-        .route("/instance/:instance_id/update_state", routing::post(update_instance_state))
-        .route("/instance/:instance_id/post_answer/:team_id", routing::post(post_answer));
+        .route("/quiz/:quiz_id/instance", routing::post(create_instance))
+        .route("/quiz/instance/:instance_id", routing::get(get_instance).delete(delete_instance))
+        .route("/quiz/instance/:instance_id/state", routing::post(update_instance_state))
+        .route("/quiz/instance/:instance_id/answer", routing::post(post_answer));
     let listener = TcpListener::bind("127.0.0.1:6767").await?;
     axum::serve(listener, router).await?;
     // let pg_pool = PgPool::connect(todo!()).await?;
@@ -97,13 +97,9 @@ async fn update_instance_state(
     (StatusCode::OK, Json(()))
 }
 
-async fn post_answer(
-    Path((instance_id, team_id)): Path<(String, String)>,
-    Json(payload): Json<PostAnswerPayload>,
-) -> impl IntoResponse {
+async fn post_answer(Path(instance_id): Path<String>, Json(payload): Json<PostAnswerPayload>) -> impl IntoResponse {
     // TODO
     drop(instance_id);
-    drop(team_id);
     let _ = payload;
     (StatusCode::OK, Json(()))
 }
