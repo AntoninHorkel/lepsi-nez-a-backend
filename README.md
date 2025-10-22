@@ -1,3 +1,9 @@
 # Lepší než áčko backend
 
-![Database schema](assets/schema.jpg)
+## Schéma databáze
+
+![Schéma databáze](assets/schema.jpg)
+
+## Endpointy
+
+![Endpointy](assets/endpoints.jpg)

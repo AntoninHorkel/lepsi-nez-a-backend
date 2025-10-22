@@ -87,7 +87,6 @@
           checks = self.checks.${system};
           packages = with pkgs; [
             bacon
-            git
             lldb
             nixfmt-tree
             postgresql
