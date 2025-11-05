@@ -1,0 +1,26 @@
+services:
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: postgresql 
+      POSTGRES_USER: postgresql 
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  nix-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgres://myuser:mypassword@postgres:5432/mydb
+    command: ["nix", "run", "."]  # Adjust this command to fit your Nix flake structure
+    volumes:
+      - .:/app  # Assuming your Nix flake is at the root of your project
+
+volumes:
+  postgres_data:
