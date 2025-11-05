@@ -8,11 +8,13 @@ use axum::{
     routing,
 };
 use serde::Deserialize;
-// use sqlx::postgres::PgPool;
+use sqlx::{migrate::Migrator, postgres::PgPool};
 use tokio::net::TcpListener;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
+    let pg_pool = PgPool::connect(todo!()).await?;
+    sqlx::migrate!("./migrations").run(&pg_pool).await?;
     let router = Router::new()
         .route("/quiz", routing::post(create_quiz).get(get_all_quizzes))
         .route("/quiz/:quiz_id", routing::get(get_quiz).post(update_quiz).delete(delete_quiz))
@@ -22,7 +24,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .route("/quiz/instance/:instance_id/answer", routing::post(post_answer));
     let listener = TcpListener::bind("127.0.0.1:6767").await?;
     axum::serve(listener, router).await?;
-    // let pg_pool = PgPool::connect(todo!()).await?;
     Ok(())
 }
 

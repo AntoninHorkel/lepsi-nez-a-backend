@@ -46,7 +46,7 @@
             path: type: (builtins.match ".*src\/.*" path != null) || (craneLib.filterCargoSources path type);
           name = "source";
         };
-        buildInputs = [];
+        buildInputs = [ ];
         commonArgs = {
           inherit src buildInputs;
           strictDeps = true;
@@ -91,6 +91,7 @@
             nixfmt-tree
             postgresql
             pre-commit
+            sqlx-cli
           ];
           shellHook = "pre-commit install";
           RUST_BACKTRACE = 1;
