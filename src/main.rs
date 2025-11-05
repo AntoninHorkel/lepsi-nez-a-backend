@@ -11,12 +11,9 @@ use serde::Deserialize;
 use sqlx::postgres::PgPool;
 use tokio::net::TcpListener;
 
-const NAME: &str = "postgresql";
-const PASSWORD: &str = "password";
-
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    let pg_pool = PgPool::connect(&format!("postgres://postgres:{PASSWORD}@localhost/{NAME}").to_owned()).await?;
+    let pg_pool = PgPool::connect(&std::env::var("DATABASE_URL")?.clone()).await?;
     sqlx::migrate!("./migrations").run(&pg_pool).await?;
     let router = Router::new()
         .route("/quiz", routing::post(create_quiz).get(get_all_quizzes))
