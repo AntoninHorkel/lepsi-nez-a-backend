@@ -1,3 +1,5 @@
+mod payloads;
+
 use std::error::Error;
 
 use axum::{
@@ -7,7 +9,7 @@ use axum::{
     response::IntoResponse,
     routing,
 };
-use serde::Deserialize;
+use payloads::{CreateInstancePayload, CreateQuizPayload, PostAnswerPayload, UpdateInstanceStatePayload};
 use sqlx::postgres::PgPool;
 use tokio::net::TcpListener;
 
@@ -27,21 +29,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-#[derive(Deserialize)]
-struct CreateQuizPayload {} // TODO
-
-#[derive(Deserialize)]
-struct CreateInstancePayload {} // TODO
-
-#[derive(Deserialize)]
-struct UpdateInstanceStatePayload {} // TODO
-
-#[derive(Deserialize)]
-struct PostAnswerPayload {} // TODO
-
 async fn create_quiz(Json(payload): Json<CreateQuizPayload>) -> impl IntoResponse {
     // TODO
-    let _ = payload;
+    println!("{payload:?}");
     (StatusCode::CREATED, Json(()))
 }
 
@@ -52,39 +42,39 @@ async fn get_all_quizzes() -> impl IntoResponse {
 
 async fn get_quiz(Path(quiz_id): Path<String>) -> impl IntoResponse {
     // TODO
-    drop(quiz_id);
+    println!("{quiz_id:?}");
     (StatusCode::OK, Json(()))
 }
 
 async fn update_quiz(Path(quiz_id): Path<String>, Json(payload): Json<CreateQuizPayload>) -> impl IntoResponse {
     // TODO
-    drop(quiz_id);
-    let _ = payload;
+    println!("{quiz_id:?}");
+    println!("{payload:?}");
     (StatusCode::OK, Json(()))
 }
 
 async fn delete_quiz(Path(quiz_id): Path<String>) -> impl IntoResponse {
     // TODO
-    drop(quiz_id);
+    println!("{quiz_id:?}");
     (StatusCode::OK, Json(()))
 }
 
 async fn create_instance(Path(quiz_id): Path<String>, Json(payload): Json<CreateInstancePayload>) -> impl IntoResponse {
     // TODO
-    drop(quiz_id);
-    let _ = payload;
+    println!("{quiz_id:?}");
+    println!("{payload:?}");
     (StatusCode::CREATED, Json(()))
 }
 
 async fn get_instance(Path(instance_id): Path<String>) -> impl IntoResponse {
     // TODO
-    drop(instance_id);
+    println!("{instance_id:?}");
     (StatusCode::OK, Json(()))
 }
 
 async fn delete_instance(Path(instance_id): Path<String>) -> impl IntoResponse {
     // TODO
-    drop(instance_id);
+    println!("{instance_id:?}");
     (StatusCode::OK, Json(()))
 }
 
@@ -93,14 +83,14 @@ async fn update_instance_state(
     Json(payload): Json<UpdateInstanceStatePayload>,
 ) -> impl IntoResponse {
     // TODO
-    drop(instance_id);
-    let _ = payload;
+    println!("{instance_id:?}");
+    println!("{payload:?}");
     (StatusCode::OK, Json(()))
 }
 
 async fn post_answer(Path(instance_id): Path<String>, Json(payload): Json<PostAnswerPayload>) -> impl IntoResponse {
     // TODO
-    drop(instance_id);
-    let _ = payload;
+    println!("{instance_id:?}");
+    println!("{payload:?}");
     (StatusCode::OK, Json(()))
 }
