@@ -1,3 +1,5 @@
+mod payloads;
+
 use std::{env, error::Error};
 
 use axum::{
@@ -7,7 +9,7 @@ use axum::{
     response::IntoResponse,
     routing,
 };
-use serde::Deserialize;
+use payloads::{CreateInstancePayload, CreateQuizPayload, PostAnswerPayload, UpdateInstanceStatePayload};
 use sqlx::{Pool, Postgres, postgres::PgPool};
 use tokio::net::TcpListener;
 use uuid::Uuid;
@@ -30,24 +32,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-#[derive(Deserialize)]
-struct CreateQuizPayload {}
-
-#[derive(Deserialize)]
-struct CreateQuestionPayload {}
-
-#[derive(Deserialize)]
-struct CreateInstancePayload {}
-
-#[derive(Deserialize)]
-struct UpdateInstanceStatePayload {}
-
-#[derive(Deserialize)]
-struct PostAnswerPayload {}
-
 async fn create_quiz(State(pool): State<Pool<Postgres>>, Json(payload): Json<CreateQuizPayload>) -> impl IntoResponse {
     // TODO
-    let _ = payload;
+    println!("{payload:?}");
     (StatusCode::CREATED, Json(()))
 }
 
@@ -58,7 +45,7 @@ async fn get_all_quizzes(State(pool): State<Pool<Postgres>>) -> impl IntoRespons
 
 async fn get_quiz(State(pool): State<Pool<Postgres>>, Path(quiz_id): Path<Uuid>) -> impl IntoResponse {
     // TODO
-
+    println!("{quiz_id:?}");
     (StatusCode::OK, Json(()))
 }
 
@@ -68,14 +55,14 @@ async fn update_quiz(
     Json(payload): Json<CreateQuizPayload>,
 ) -> impl IntoResponse {
     // TODO
-    drop(quiz_id);
-    let _ = payload;
+    println!("{quiz_id:?}");
+    println!("{payload:?}");
     (StatusCode::OK, Json(()))
 }
 
 async fn delete_quiz(State(pool): State<Pool<Postgres>>, Path(quiz_id): Path<String>) -> impl IntoResponse {
     // TODO
-    drop(quiz_id);
+    println!("{quiz_id:?}");
     (StatusCode::OK, Json(()))
 }
 
@@ -85,20 +72,20 @@ async fn create_instance(
     Json(payload): Json<CreateInstancePayload>,
 ) -> impl IntoResponse {
     // TODO
-    drop(quiz_id);
-    let _ = payload;
+    println!("{quiz_id:?}");
+    println!("{payload:?}");
     (StatusCode::CREATED, Json(()))
 }
 
 async fn get_instance(State(pool): State<Pool<Postgres>>, Path(instance_id): Path<String>) -> impl IntoResponse {
     // TODO
-    drop(instance_id);
+    println!("{instance_id:?}");
     (StatusCode::OK, Json(()))
 }
 
 async fn delete_instance(State(pool): State<Pool<Postgres>>, Path(instance_id): Path<String>) -> impl IntoResponse {
     // TODO
-    drop(instance_id);
+    println!("{instance_id:?}");
     (StatusCode::OK, Json(()))
 }
 
@@ -108,8 +95,8 @@ async fn update_instance_state(
     Json(payload): Json<UpdateInstanceStatePayload>,
 ) -> impl IntoResponse {
     // TODO
-    drop(instance_id);
-    let _ = payload;
+    println!("{instance_id:?}");
+    println!("{payload:?}");
     (StatusCode::OK, Json(()))
 }
 
@@ -119,7 +106,7 @@ async fn post_answer(
     Json(payload): Json<PostAnswerPayload>,
 ) -> impl IntoResponse {
     // TODO
-    drop(instance_id);
-    let _ = payload;
+    println!("{instance_id:?}");
+    println!("{payload:?}");
     (StatusCode::OK, Json(()))
 }
