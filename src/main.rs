@@ -10,7 +10,7 @@ use axum::{
     routing,
 };
 use payloads::{CreateInstancePayload, CreateQuizPayload, PostAnswerPayload, UpdateInstanceStatePayload};
-use sqlx::{Pool, Postgres, postgres::PgPool};
+use sqlx::{Executor, Pool, Postgres, postgres::PgPool};
 use tokio::net::TcpListener;
 use uuid::Uuid;
 
@@ -21,11 +21,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let router = Router::new()
         .route("/quiz", routing::post(create_quiz).get(get_all_quizzes))
-        .route("/quiz/:quiz_id", routing::get(get_quiz).post(update_quiz).delete(delete_quiz))
-        .route("/quiz/:quiz_id/instance", routing::post(create_instance))
-        .route("/quiz/instance/:instance_id", routing::get(get_instance).delete(delete_instance))
-        .route("/quiz/instance/:instance_id/state", routing::post(update_instance_state))
-        .route("/quiz/instance/:instance_id/answer", routing::post(post_answer))
+        .route("/quiz/{quiz_id}", routing::get(get_quiz).post(update_quiz).delete(delete_quiz))
+        .route("/quiz/{quiz_id}/instance", routing::post(create_instance))
+        .route("/quiz/instance/{instance_id}", routing::get(get_instance).delete(delete_instance))
+        .route("/quiz/instance/{instance_id}/state", routing::post(update_instance_state))
+        .route("/quiz/instance/{instance_id}/answer", routing::post(post_answer))
         .with_state(pg_pool);
     let listener = TcpListener::bind("127.0.0.1:6767").await?;
     axum::serve(listener, router).await?;
@@ -51,7 +51,7 @@ async fn get_quiz(State(pool): State<Pool<Postgres>>, Path(quiz_id): Path<Uuid>)
 
 async fn update_quiz(
     State(pool): State<Pool<Postgres>>,
-    Path(quiz_id): Path<String>,
+    Path(quiz_id): Path<Uuid>,
     Json(payload): Json<CreateQuizPayload>,
 ) -> impl IntoResponse {
     // TODO
@@ -60,7 +60,7 @@ async fn update_quiz(
     (StatusCode::OK, Json(()))
 }
 
-async fn delete_quiz(State(pool): State<Pool<Postgres>>, Path(quiz_id): Path<String>) -> impl IntoResponse {
+async fn delete_quiz(State(pool): State<Pool<Postgres>>, Path(quiz_id): Path<Uuid>) -> impl IntoResponse {
     // TODO
     println!("{quiz_id:?}");
     (StatusCode::OK, Json(()))
@@ -68,7 +68,7 @@ async fn delete_quiz(State(pool): State<Pool<Postgres>>, Path(quiz_id): Path<Str
 
 async fn create_instance(
     State(pool): State<Pool<Postgres>>,
-    Path(quiz_id): Path<String>,
+    Path(quiz_id): Path<Uuid>,
     Json(payload): Json<CreateInstancePayload>,
 ) -> impl IntoResponse {
     // TODO
@@ -77,13 +77,13 @@ async fn create_instance(
     (StatusCode::CREATED, Json(()))
 }
 
-async fn get_instance(State(pool): State<Pool<Postgres>>, Path(instance_id): Path<String>) -> impl IntoResponse {
+async fn get_instance(State(pool): State<Pool<Postgres>>, Path(instance_id): Path<Uuid>) -> impl IntoResponse {
     // TODO
     println!("{instance_id:?}");
     (StatusCode::OK, Json(()))
 }
 
-async fn delete_instance(State(pool): State<Pool<Postgres>>, Path(instance_id): Path<String>) -> impl IntoResponse {
+async fn delete_instance(State(pool): State<Pool<Postgres>>, Path(instance_id): Path<Uuid>) -> impl IntoResponse {
     // TODO
     println!("{instance_id:?}");
     (StatusCode::OK, Json(()))
@@ -91,7 +91,7 @@ async fn delete_instance(State(pool): State<Pool<Postgres>>, Path(instance_id): 
 
 async fn update_instance_state(
     State(pool): State<Pool<Postgres>>,
-    Path(instance_id): Path<String>,
+    Path(instance_id): Path<Uuid>,
     Json(payload): Json<UpdateInstanceStatePayload>,
 ) -> impl IntoResponse {
     // TODO
@@ -102,7 +102,7 @@ async fn update_instance_state(
 
 async fn post_answer(
     State(pool): State<Pool<Postgres>>,
-    Path(instance_id): Path<String>,
+    Path(instance_id): Path<Uuid>,
     Json(payload): Json<PostAnswerPayload>,
 ) -> impl IntoResponse {
     // TODO

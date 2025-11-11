@@ -7,9 +7,10 @@ struct CreateQuizPayloadQuestionAnswer {
     isCorrect: bool,
 }
 
+#[allow(non_snake_case)]
 #[derive(Debug, Deserialize)]
 struct CreateQuizPayloadQuestion {
-    question_text: String,
+    questionText: String,
     answers: Vec<CreateQuizPayloadQuestionAnswer>,
 }
 

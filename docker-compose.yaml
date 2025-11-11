@@ -6,7 +6,7 @@ services:
       - POSTGRES_USER=myuser
       - POSTGRES_PASSWORD=mysecretpassword
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql
     ports:
       - "5432:5432"
     healthcheck:
@@ -15,17 +15,18 @@ services:
       timeout: 5s
       retries: 5
 
-  app:
-    image: nixos/nix
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      - DATABASE_URL=postgresql://myuser:mysecretpassword@postgres:5432/myapp
-    volumes:
-      - .:/app
-    working_dir: /app
-    command: nix run .
+  # app:
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   build: 
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   environment:
+  #     - DATABASE_URL=postgresql://myuser:mysecretpassword@postgres:5432/myapp
+  #   volumes:
+  #     - .:/app
+  #   working_dir: /app
 
 volumes:
   postgres-data:
