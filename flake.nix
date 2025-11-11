@@ -89,7 +89,7 @@
             bacon
             nixfmt-tree
             pre-commit
-            # sqlx-cli
+            sqlx-cli
           ];
           shellHook = "pre-commit install";
           RUST_BACKTRACE = 1;

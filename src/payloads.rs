@@ -1,24 +1,8 @@
 use serde::Deserialize;
 
-#[allow(non_snake_case)]
-#[derive(Debug, Deserialize)]
-struct CreateQuizPayloadQuestionAnswer {
-    text: String,
-    isCorrect: bool,
-}
+use crate::types::Quiz;
 
-#[allow(non_snake_case)]
-#[derive(Debug, Deserialize)]
-struct CreateQuizPayloadQuestion {
-    questionText: String,
-    answers: Vec<CreateQuizPayloadQuestionAnswer>,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct CreateQuizPayload {
-    name: String,
-    question: Vec<CreateQuizPayloadQuestion>,
-}
+pub type CreateQuizPayload = Quiz;
 
 #[derive(Debug, Deserialize)]
 pub struct CreateInstancePayload {}

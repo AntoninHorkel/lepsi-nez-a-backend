@@ -1,0 +1,23 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TABLE quizzes (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name TEXT NOT NULL
+);
+
+CREATE TABLE questions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    quiz_id UUID NOT NULL REFERENCES quizzes(id) ON DELETE CASCADE,
+    text TEXT NOT NULL
+);
+
+CREATE TABLE answers (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    question_id UUID NOT NULL REFERENCES questions(id) ON DELETE CASCADE,
+    text TEXT NOT NULL,
+    is_correct BOOLEAN NOT NULL
+);
+
+-- Indexes for performance
+CREATE INDEX idx_questions_quiz_id ON questions(quiz_id);
+CREATE INDEX idx_answers_question_id ON answers(question_id);

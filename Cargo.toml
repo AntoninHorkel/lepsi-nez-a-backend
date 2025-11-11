@@ -45,9 +45,9 @@ rpath = true
 [dependencies]
 axum = "0.8"
 serde = "1.0"
-sqlx = { version = "0.8", features = ["postgres", "runtime-tokio"] }
+sqlx = { version = "0.8", features = ["postgres", "runtime-tokio", "uuid"] }
 tokio = { version = "1.48", features = ["macros", "rt-multi-thread"] }
-uuid = { version = "1.18.1", features = ["serde"] }
+uuid = { version = "1.18", features = ["serde"] }
 
 # https://doc.rust-lang.org/rustc/lints/listing/index.html
 # TODO: More lints
