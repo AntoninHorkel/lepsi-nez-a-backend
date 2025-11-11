@@ -20,6 +20,19 @@ pub struct Answer {
     pub isCorrect: bool,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+pub struct QuizInstance {
+    pub state: QuizInstanceState,
+}
+
+#[allow(non_camel_case_types)]
+#[derive(Debug, Deserialize, Serialize)]
+pub enum QuizInstanceState {
+    active,
+    completed,
+    paused,
+}
+
 #[derive(Debug, Deserialize, Serialize, sqlx::FromRow)]
 pub struct QuizSQL {
     pub id: Uuid,
@@ -40,3 +53,5 @@ pub struct AnswerSQL {
     pub text: String,
     pub is_correct: bool,
 }
+
+pub type QuizInstanceStateSQL = QuizInstanceState;

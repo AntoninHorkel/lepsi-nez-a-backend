@@ -1,5 +1,223 @@
 # Lepší než áčko backend
 
+## POST /quiz
+
+Create quiz
+
+### Request Payload
+
+- Type: JSON
+- Structure:
+    ```json
+    {
+      "name": <string>,
+      "questions": [
+        {
+          "text": <string>,
+          "answers": [
+            {
+              "text": <string>,
+              "isCorrect": <bool>
+            }
+          ]
+        }
+      ]
+    }
+    ```
+
+### Response Payloads
+
+- HTTP 201 (CREATED): <uuid string>
+- HTTP 500 (INTERNAL SERVER ERROR): <error string>
+
+## GET /quiz
+
+Get all quizzes
+
+- No Request Payload
+
+### Response Payloads
+
+- HTTP 200 (OK):
+    - Type: JSON
+    - Structure:
+        ```json
+        [
+          {
+            "name": <string>,
+            "questions": [
+              {
+                "id": <uuid string>,
+                "text": <string>,
+                "answers": [
+                  {
+                    "id": <uuid string>,
+                    "text": <string>,
+                    "isCorrect": <bool>
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+        ```
+- HTTP 500 (INTERNAL SERVER ERROR): <error string>
+
+## GET /quiz/<id>
+
+Get quiz by ID
+
+- No Request Payload
+
+### Response Payloads
+
+- HTTP 200 (OK):
+    - Type: JSON
+    - Structure:
+        ```json
+        {
+          "name": <string>,
+          "questions": [
+            {
+              "id": <uuid string>,
+              "text": <string>,
+              "answers": [
+                {
+                  "id": <uuid string>,
+                  "text": <string>,
+                  "isCorrect": <bool>
+                }
+              ]
+            }
+          ]
+        }
+        ```
+- HTTP 404 (NOT FOUND): <error string>
+- HTTP 500 (INTERNAL SERVER ERROR): <error string>
+
+## POST /quiz/<id>
+
+Update quiz with ID
+
+### Request Payload
+
+- Type: JSON
+- Structure:
+    ```json
+    {
+      "name": <string>,
+      "questions": [
+        {
+          "text": <string>,
+          "answers": [
+            {
+              "text": <string>,
+              "isCorrect": <bool>
+            }
+          ]
+        }
+      ]
+    }
+    ```
+
+### Response Payloads
+
+- HTTP 200 (OK)
+- HTTP 404 (NOT FOUND): <error string>
+- HTTP 500 (INTERNAL SERVER ERROR): <error string>
+
+## DELETE /quiz/<id>
+
+Delete quiz with ID
+
+- No Request Payload
+
+### Response Payloads
+
+- HTTP 200 (OK)
+- HTTP 404 (NOT FOUND): <error string>
+- HTTP 500 (INTERNAL SERVER ERROR): <error string>
+
+## POST /quiz/<id>/instance
+
+Create quiz instance
+
+- No Request Payload
+
+### Response Payloads
+
+- HTTP 201 (CREATED): <uuid string>
+- HTTP 404 (NOT FOUND): <error string>
+- HTTP 500 (INTERNAL SERVER ERROR): <error string>
+
+## GET /quiz/instance/<id>
+
+Get quiz instance by ID
+
+- No Request Payload
+
+### Response Payloads
+
+- HTTP 200 (OK):
+    - Type: JSON
+    - Structure:
+        ```json
+        {
+          "quiz_id": <uuid string>,
+          "state": <"active", "completed" or "paused">
+        }
+        ```
+- HTTP 404 (NOT FOUND): <error string>
+- HTTP 500 (INTERNAL SERVER ERROR): <error string>
+
+## DELETE /quiz/instance/<id>
+
+Delete quiz instance with ID
+
+- No Request Payload
+
+### Response Payloads
+
+- HTTP 200 (OK)
+- HTTP 404 (NOT FOUND): <error string>
+- HTTP 500 (INTERNAL SERVER ERROR): <error string>
+
+## POST /quiz/instance/<id>/state
+
+Update quiz instance state
+
+### Request Payload
+
+- Type: string, "active", "completed" or "paused"
+
+### Response Payloads
+
+- HTTP 200 (OK)
+- HTTP 404 (NOT FOUND): <error string>
+- HTTP 500 (INTERNAL SERVER ERROR): <error string>
+
+## POST /quiz/instance/<id>/answer
+
+Post answer
+
+### Request Payload
+
+- Type: JSON
+- Structure:
+    ```json
+    {
+      "team": <integer>,
+      "question_id": <uuid string>,
+      "answer_id": <uuid string>
+    }
+    ```
+
+### Response Payloads
+
+- HTTP 200 (OK)
+- HTTP 404 (NOT FOUND): <error string>
+- HTTP 500 (INTERNAL SERVER ERROR): <error string>
+
 ## Environment variables
 
 - DATABASE_URL: PostgreSQL database URL

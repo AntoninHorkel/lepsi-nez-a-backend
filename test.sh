@@ -41,9 +41,9 @@ payload='{
   ]
 }'
 curl -X POST http://localhost:6767/quiz -H "Content-Type: application/json" -d "$payload"
-echo "\n\n"
+echo -e "\n"
 echo "Testing get_all_quizzes:"
 curl -X GET http://localhost:6767/quiz
-echo "\n\n"
+echo -e "\n"
 echo "Testing get_guiz:"
 curl -X GET http://localhost:6767/quiz/b6016b8f-d1ea-418f-a7ee-5227902520d0 # TODO: Get id from create_quiz result.

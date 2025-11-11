@@ -1,6 +1,7 @@
 use serde::Deserialize;
+use uuid::Uuid;
 
-use crate::types::Quiz;
+use crate::types::{Quiz, QuizInstanceState};
 
 pub type CreateQuizPayload = Quiz;
 
@@ -8,7 +9,10 @@ pub type CreateQuizPayload = Quiz;
 pub struct CreateInstancePayload {}
 
 #[derive(Debug, Deserialize)]
-pub struct UpdateInstanceStatePayload {}
+pub struct UpdateInstanceStatePayload {
+    pub id: Uuid,
+    pub state: QuizInstanceState,
+}
 
 #[derive(Debug, Deserialize)]
 pub struct PostAnswerPayload {}

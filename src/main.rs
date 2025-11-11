@@ -1,5 +1,4 @@
 mod payloads;
-mod responses;
 mod types;
 
 use std::{env, error::Error};
@@ -12,14 +11,11 @@ use axum::{
     routing,
 };
 use payloads::{CreateInstancePayload, CreateQuizPayload, PostAnswerPayload, UpdateInstanceStatePayload};
-use responses::{CreateQuizResponse, GetAllQuizzesResponse};
 use sqlx::postgres::PgPool;
 use tokio::net::TcpListener;
 #[allow(unused_imports)] // Are you happy now, rust-analyzer?
 use types::{Answer, AnswerSQL, Question, QuestionSQL, Quiz, QuizSQL};
 use uuid::Uuid;
-
-use crate::responses::GetQuizResponse;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -45,12 +41,9 @@ where
     (StatusCode::INTERNAL_SERVER_ERROR, err.to_string())
 }
 
-type HandlerResult<T> = Result<(StatusCode, Json<T>), (StatusCode, String)>;
+type HandlerResult<T> = Result<(StatusCode, T), (StatusCode, String)>;
 
-async fn create_quiz(
-    State(pool): State<PgPool>,
-    Json(payload): Json<CreateQuizPayload>,
-) -> HandlerResult<CreateQuizResponse> {
+async fn create_quiz(State(pool): State<PgPool>, Json(payload): Json<CreateQuizPayload>) -> HandlerResult<String> {
     // let mut tx = pool.begin().await.map_err(internal_error)?;
     let quiz_id = sqlx::query!("INSERT INTO quizzes (name) VALUES ($1) RETURNING id", payload.name)
         .fetch_one(&pool)
@@ -76,15 +69,10 @@ async fn create_quiz(
             .map_err(internal_error)?;
         }
     }
-    Ok((
-        StatusCode::CREATED,
-        Json(CreateQuizResponse {
-            id: quiz_id,
-        }),
-    ))
+    Ok((StatusCode::CREATED, quiz_id.to_string()))
 }
 
-async fn get_all_quizzes(State(pool): State<PgPool>) -> HandlerResult<GetAllQuizzesResponse> {
+async fn get_all_quizzes(State(pool): State<PgPool>) -> HandlerResult<Json<Vec<Quiz>>> {
     // let mut tx = pool.begin().await.map_err(internal_error)?;
     let quizzes =
         sqlx::query_as!(QuizSQL, "SELECT id, name FROM quizzes").fetch_all(&pool).await.map_err(internal_error)?;
@@ -124,7 +112,7 @@ async fn get_all_quizzes(State(pool): State<PgPool>) -> HandlerResult<GetAllQuiz
     Ok((StatusCode::OK, Json(result)))
 }
 
-async fn get_quiz(State(pool): State<PgPool>, Path(quiz_id): Path<Uuid>) -> HandlerResult<GetQuizResponse> {
+async fn get_quiz(State(pool): State<PgPool>, Path(quiz_id): Path<Uuid>) -> HandlerResult<Json<Quiz>> {
     // let mut tx = pool.begin().await.map_err(internal_error)?;
     let quiz = sqlx::query_as!(QuizSQL, "SELECT id, name FROM quizzes WHERE id = $1", quiz_id)
         .fetch_optional(&pool)
@@ -217,12 +205,12 @@ async fn update_instance_state(
     State(pool): State<PgPool>,
     Path(instance_id): Path<Uuid>,
     Json(payload): Json<UpdateInstanceStatePayload>,
-) -> impl IntoResponse {
+) -> HandlerResult<()> {
     // TODO
     drop(pool);
     println!("{instance_id:#?}");
     println!("{payload:#?}");
-    (StatusCode::OK, Json(()))
+    Ok((StatusCode::OK, ()))
 }
 
 async fn post_answer(

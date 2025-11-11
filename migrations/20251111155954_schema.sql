@@ -18,6 +18,13 @@ CREATE TABLE answers (
     is_correct BOOLEAN NOT NULL
 );
 
+CREATE TABLE quiz_instances (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    quiz_id UUID NOT NULL REFERENCES quizzes(id) ON DELETE CASCADE,
+    state TEXT NOT NULL CHECK (state IN ('active', 'completed', 'paused'))
+);
+
 -- Indexes for performance
 CREATE INDEX idx_questions_quiz_id ON questions(quiz_id);
 CREATE INDEX idx_answers_question_id ON answers(question_id);
+CREATE INDEX idx_quiz_instances_quiz_id ON quiz_instances(quiz_id);
