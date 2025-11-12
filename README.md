@@ -256,11 +256,3 @@ docker compose down -v
 docker compose up -d
 sqlx migrate run
 ```
-
-## Schéma databáze (deprecated)
-
-![Schéma databáze](assets/schema.jpg)
-
-## Endpointy (deprecated)
-
-![Endpointy](assets/endpoints.jpg)
