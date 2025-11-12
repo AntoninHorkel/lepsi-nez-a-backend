@@ -173,54 +173,63 @@ async fn update_quiz(
     (StatusCode::OK, Json(()))
 }
 
-async fn delete_quiz(State(pool): State<PgPool>, Path(quiz_id): Path<Uuid>) -> impl IntoResponse {
+async fn delete_quiz(State(pool): State<PgPool>, Path(quiz_id): Path<Uuid>) -> HandlerResult<Json<()>> {
     // TODO
     drop(pool);
     println!("{quiz_id:#?}");
-    (StatusCode::OK, Json(()))
+    Ok((StatusCode::OK, Json(())))
 }
 
-async fn create_instance(State(pool): State<PgPool>, Path(quiz_id): Path<Uuid>) -> impl IntoResponse {
-    // TODO
-    drop(pool);
-    println!("{quiz_id:#?}");
-    (StatusCode::CREATED, Json(()))
+async fn create_instance(State(pool): State<PgPool>, Path(quiz_id): Path<Uuid>) -> HandlerResult<String> {
+    // TODO: Maybe `RETURNING`?
+    let quiz = sqlx::query_as!(sql::Quiz, "SELECT id, name FROM quizzes WHERE id = $1", quiz_id)
+        .fetch_optional(&pool)
+        .await
+        .map_err(internal_error)?
+        .ok_or((StatusCode::NOT_FOUND, "Quiz not found".to_owned()))?;
+    let instance_id =
+        sqlx::query!("INSERT INTO quiz_instances (quiz_id, state) VALUES ($1, 'active') RETURNING id", quiz.id)
+            .fetch_one(&pool)
+            .await
+            .map_err(internal_error)?
+            .id;
+    Ok((StatusCode::CREATED, instance_id.to_string()))
 }
 
-async fn get_instance(State(pool): State<PgPool>, Path(instance_id): Path<Uuid>) -> impl IntoResponse {
+async fn get_instance(State(pool): State<PgPool>, Path(instance_id): Path<Uuid>) -> HandlerResult<Json<()>> {
     // TODO
     drop(pool);
     println!("{instance_id:#?}");
-    (StatusCode::OK, Json(()))
+    Ok((StatusCode::OK, Json(())))
 }
 
-async fn delete_instance(State(pool): State<PgPool>, Path(instance_id): Path<Uuid>) -> impl IntoResponse {
+async fn delete_instance(State(pool): State<PgPool>, Path(instance_id): Path<Uuid>) -> HandlerResult<Json<()>> {
     // TODO
     drop(pool);
     println!("{instance_id:#?}");
-    (StatusCode::OK, Json(()))
+    Ok((StatusCode::OK, Json(())))
 }
 
 async fn update_instance_state(
     State(pool): State<PgPool>,
     Path(instance_id): Path<Uuid>,
     Json(payload): Json<request::QuizInstanceState>,
-) -> HandlerResult<()> {
+) -> HandlerResult<Json<()>> {
     // TODO
     drop(pool);
     println!("{instance_id:#?}");
     println!("{payload:#?}");
-    Ok((StatusCode::OK, ()))
+    Ok((StatusCode::OK, Json(())))
 }
 
 async fn post_answer(
     State(pool): State<PgPool>,
     Path(instance_id): Path<Uuid>,
     Json(payload): Json<request::QuizInstanceAnswer>,
-) -> impl IntoResponse {
+) -> HandlerResult<Json<()>> {
     // TODO
     drop(pool);
     println!("{instance_id:#?}");
     println!("{payload:#?}");
-    (StatusCode::OK, Json(()))
+    Ok((StatusCode::OK, Json(())))
 }
