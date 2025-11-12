@@ -198,6 +198,28 @@ Update quiz instance state
 - HTTP 404 (NOT FOUND): <error string>
 - HTTP 500 (INTERNAL SERVER ERROR): <error string>
 
+## POST `/quiz/instance/<id>/answer`
+
+Post answer
+
+### Request Payload
+
+- Type: JSON
+- Structure:
+    ```json
+    {
+      "questionId": <uuid string>,
+      "answerId": <uuid string>,
+      "team": <integer>
+    }
+    ```
+
+### Response Payloads
+
+- HTTP 200 (OK)
+- HTTP 404 (NOT FOUND): <error string>
+- HTTP 500 (INTERNAL SERVER ERROR): <error string>
+
 ## GET `/quiz/instance/<id>/answer`
 
 Get all answers
@@ -220,28 +242,6 @@ Get all answers
             }
         ]
         ```
-- HTTP 404 (NOT FOUND): <error string>
-- HTTP 500 (INTERNAL SERVER ERROR): <error string>
-
-## POST `/quiz/instance/<id>/answer`
-
-Post answer
-
-### Request Payload
-
-- Type: JSON
-- Structure:
-    ```json
-    {
-      "questionId": <uuid string>,
-      "answerId": <uuid string>,
-      "team": <integer>
-    }
-    ```
-
-### Response Payloads
-
-- HTTP 200 (OK)
 - HTTP 404 (NOT FOUND): <error string>
 - HTTP 500 (INTERNAL SERVER ERROR): <error string>
 

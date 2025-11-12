@@ -143,6 +143,7 @@ pub mod sql {
     #[derive(Debug, FromRow)]
     pub struct QuizInstanceAnswer {
         pub id: Uuid,
+        #[allow(dead_code)]
         pub instance_id: Uuid,
         pub question_id: Uuid,
         pub answer_id: Uuid,

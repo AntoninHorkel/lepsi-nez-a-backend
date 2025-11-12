@@ -25,7 +25,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .route("/quiz/{quiz_id}/instance", routing::post(create_instance))
         .route("/quiz/instance/{instance_id}", routing::get(get_instance).delete(delete_instance))
         .route("/quiz/instance/{instance_id}/state", routing::post(update_instance_state))
-        .route("/quiz/instance/{instance_id}/answer", routing::get(get_all_answers).post(post_answer))
+        .route("/quiz/instance/{instance_id}/answer", routing::post(post_answer).get(get_all_answers))
         .with_state(pool);
     let listener = TcpListener::bind(env::var("ROUTER_URL").unwrap_or("127.0.0.1:6767".to_owned())).await?;
     axum::serve(listener, router).await?;
@@ -248,6 +248,29 @@ async fn update_instance_state(
     }
 }
 
+async fn post_answer(
+    State(pool): State<PgPool>,
+    Path(instance_id): Path<Uuid>,
+    Json(payload): Json<request::QuizInstanceAnswer>,
+) -> HandlerResult<()> {
+    let resp = sqlx::query!(
+        "INSERT INTO team_answers (instance_id, question_id, answer_id, team) VALUES ($1, $2, $3, $4)",
+        instance_id,
+        payload.questionId,
+        payload.answerId,
+        payload.team,
+    )
+    .execute(&pool)
+    .await
+    .map_err(internal_error)?
+    .rows_affected();
+    if resp == 0 {
+        Err((StatusCode::NOT_FOUND, "Quiz instance not found".to_owned()))
+    } else {
+        Ok((StatusCode::OK, ()))
+    }
+}
+
 async fn get_all_answers(
     State(pool): State<PgPool>,
     Path(instance_id): Path<Uuid>,
@@ -273,28 +296,5 @@ async fn get_all_answers(
         Err((StatusCode::NOT_FOUND, "Quiz instance not found".to_owned()))
     } else {
         Ok((StatusCode::OK, Json(answers)))
-    }
-}
-
-async fn post_answer(
-    State(pool): State<PgPool>,
-    Path(instance_id): Path<Uuid>,
-    Json(payload): Json<request::QuizInstanceAnswer>,
-) -> HandlerResult<()> {
-    let resp = sqlx::query!(
-        "INSERT INTO team_answers (instance_id, question_id, answer_id, team) VALUES ($1, $2, $3, $4)",
-        instance_id,
-        payload.questionId,
-        payload.answerId,
-        payload.team,
-    )
-    .execute(&pool)
-    .await
-    .map_err(internal_error)?
-    .rows_affected();
-    if resp == 0 {
-        Err((StatusCode::NOT_FOUND, "Quiz instance not found".to_owned()))
-    } else {
-        Ok((StatusCode::OK, ()))
     }
 }
