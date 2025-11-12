@@ -52,7 +52,8 @@ echo "Testing update_quiz:"
 echo "TODO"
 echo -e "\n"
 echo "Testing delete_quiz:"
-echo "TODO"
+temp_quiz_id=$(curl -X POST http://localhost:6767/quiz -H "Content-Type: application/json" -d "$payload")
+curl -X DELETE http://localhost:6767/quiz/$temp_quiz_id
 echo -e "\n"
 echo "Testing create_instance:"
 instance_id=$(curl -X POST http://localhost:6767/quiz/$quiz_id/instance)
@@ -62,7 +63,8 @@ echo "Testing get_instance:"
 curl -X GET http://localhost:6767/quiz/instance/$instance_id
 echo -e "\n"
 echo "Testing delete_instance:"
-echo "TODO"
+temp_instance_id=$(curl -X POST http://localhost:6767/quiz/$quiz_id/instance)
+curl -X DELETE http://localhost:6767/quiz/instance/$temp_instance_id
 echo -e "\n"
 echo "Testing update_instance_state:"
 echo "TODO"

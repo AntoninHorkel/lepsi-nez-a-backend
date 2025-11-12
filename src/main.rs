@@ -173,18 +173,13 @@ async fn update_quiz(
     (StatusCode::OK, Json(()))
 }
 
-async fn delete_quiz(State(pool): State<PgPool>, Path(quiz_id): Path<Uuid>) -> HandlerResult<Json<()>> {
-    let resp = sqlx::query("DELETE FROM quizzes WHERE id = $1")
-        .bind(quiz_id)
+async fn delete_quiz(State(pool): State<PgPool>, Path(quiz_id): Path<Uuid>) -> HandlerResult<()> {
+    let resp = sqlx::query!("DELETE FROM quizzes WHERE id = $1", quiz_id)
         .execute(&pool)
         .await
         .map_err(internal_error)?
         .rows_affected();
-    if resp > 0 {
-        Ok((StatusCode::NOT_FOUND, Json(())))
-    }
-    println!("{quiz_id:#?}");
-    Ok((StatusCode::OK, Json(())))
+    if resp == 0 { Err((StatusCode::NOT_FOUND, "Quiz not found".to_owned())) } else { Ok((StatusCode::OK, ())) }
 }
 
 async fn create_instance(State(pool): State<PgPool>, Path(quiz_id): Path<Uuid>) -> HandlerResult<String> {
@@ -212,7 +207,7 @@ async fn get_instance(
             .fetch_optional(&pool)
             .await
             .map_err(internal_error)?
-            .ok_or((StatusCode::NOT_FOUND, "Quiz not found".to_owned()))?;
+            .ok_or((StatusCode::NOT_FOUND, "Quiz instance not found".to_owned()))?;
     Ok((
         StatusCode::OK,
         Json(response::QuizInstance {
@@ -222,19 +217,17 @@ async fn get_instance(
     ))
 }
 
-async fn delete_instance(State(pool): State<PgPool>, Path(instance_id): Path<Uuid>) -> HandlerResult<Json<()>> {
-    // TODO
-    let resp = sqlx::query("DELETE FROM quiz_instances WHERE id = $1")
-        .bind(instance_id)
+async fn delete_instance(State(pool): State<PgPool>, Path(instance_id): Path<Uuid>) -> HandlerResult<()> {
+    let resp = sqlx::query!("DELETE FROM quiz_instances WHERE id = $1", instance_id)
         .execute(&pool)
         .await
         .map_err(internal_error)?
         .rows_affected();
-    if resp > 0 {
-        Ok((StatusCode::NOT_FOUND, Json(())))
+    if resp == 0 {
+        Err((StatusCode::NOT_FOUND, "Quiz instance not found".to_owned()))
+    } else {
+        Ok((StatusCode::OK, ()))
     }
-    println!("{instance_id:#?}");
-    Ok((StatusCode::OK, Json(())))
 }
 
 async fn update_instance_state(
