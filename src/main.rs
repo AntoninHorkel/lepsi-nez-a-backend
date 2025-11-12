@@ -15,6 +15,8 @@ use tokio::net::TcpListener;
 use types::{request, response, sql};
 use uuid::Uuid;
 
+use crate::types::QuizInstanceState;
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     let pool = PgPool::connect(&env::var("DATABASE_URL")?.clone()).await?;
@@ -181,7 +183,7 @@ async fn delete_quiz(State(pool): State<PgPool>, Path(quiz_id): Path<Uuid>) -> H
         .map_err(internal_error)?
         .rows_affected();
     if resp > 0 {
-        Ok((StatusCode::NOT_FOUND, Json(())))
+        return Ok((StatusCode::NOT_FOUND, Json(())));
     }
     println!("{quiz_id:#?}");
     Ok((StatusCode::OK, Json(())))
@@ -231,7 +233,7 @@ async fn delete_instance(State(pool): State<PgPool>, Path(instance_id): Path<Uui
         .map_err(internal_error)?
         .rows_affected();
     if resp > 0 {
-        Ok((StatusCode::NOT_FOUND, Json(())))
+        return Ok((StatusCode::NOT_FOUND, Json(())));
     }
     println!("{instance_id:#?}");
     Ok((StatusCode::OK, Json(())))
@@ -241,12 +243,19 @@ async fn update_instance_state(
     State(pool): State<PgPool>,
     Path(instance_id): Path<Uuid>,
     Json(payload): Json<request::QuizInstanceState>,
-) -> HandlerResult<Json<()>> {
-    // TODO
-    drop(pool);
-    println!("{instance_id:#?}");
-    println!("{payload:#?}");
-    Ok((StatusCode::OK, Json(())))
+) -> HandlerResult<()> {
+    let state: String = payload.into();
+    let resp = sqlx::query!("UPDATE quiz_instances SET state = $1 WHERE id = $2", state, instance_id)
+        .execute(&pool)
+        .await
+        .map_err(internal_error)?
+        .rows_affected();
+
+    if resp == 0 {
+        Err((StatusCode::NOT_FOUND, "Quiz instance not found".to_owned()))
+    } else {
+        Ok((StatusCode::OK, ()))
+    }
 }
 
 async fn post_answer(
