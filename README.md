@@ -198,6 +198,30 @@ Update quiz instance state
 - HTTP 404 (NOT FOUND): <error string>
 - HTTP 500 (INTERNAL SERVER ERROR): <error string>
 
+## GET `/quiz/instance/<id>/answer`
+
+Get all answers
+
+- No Request Payload
+
+### Response Payloads
+
+- HTTP 200 (OK):
+    - Type: JSON
+    - Structure:
+        ```json
+        [
+            {
+              "id": <uuid string>,
+              "questionId": <uuid string>,
+              "answerId": <uuid string>
+              "team": <integer>,
+            }
+        ]
+        ```
+- HTTP 404 (NOT FOUND): <error string>
+- HTTP 500 (INTERNAL SERVER ERROR): <error string>
+
 ## POST `/quiz/instance/<id>/answer`
 
 Post answer
@@ -208,9 +232,9 @@ Post answer
 - Structure:
     ```json
     {
-      "team": <integer>,
       "questionId": <uuid string>,
       "answerId": <uuid string>
+      "team": <integer>,
     }
     ```
 
@@ -232,11 +256,3 @@ docker compose down -v
 docker compose up -d
 sqlx migrate run
 ```
-
-## Schéma databáze (deprecated)
-
-![Schéma databáze](assets/schema.jpg)
-
-## Endpointy (deprecated)
-
-![Endpointy](assets/endpoints.jpg)

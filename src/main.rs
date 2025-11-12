@@ -25,7 +25,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .route("/quiz/{quiz_id}/instance", routing::post(create_instance))
         .route("/quiz/instance/{instance_id}", routing::get(get_instance).delete(delete_instance))
         .route("/quiz/instance/{instance_id}/state", routing::post(update_instance_state))
-        .route("/quiz/instance/{instance_id}/answer", routing::post(post_answer))
+        .route("/quiz/instance/{instance_id}/answer", routing::get(get_all_answers).post(post_answer))
         .with_state(pool);
     let listener = TcpListener::bind(env::var("ROUTER_URL").unwrap_or("127.0.0.1:6767".to_owned())).await?;
     axum::serve(listener, router).await?;
@@ -246,6 +246,13 @@ async fn update_instance_state(
     } else {
         Ok((StatusCode::OK, ()))
     }
+}
+
+async fn get_all_answers(State(pool): State<PgPool>, Path(instance_id): Path<Uuid>) -> HandlerResult<Json<()>> {
+    // TODO
+    drop(pool);
+    println!("{instance_id:#?}");
+    Ok((StatusCode::OK, Json(())))
 }
 
 async fn post_answer(
