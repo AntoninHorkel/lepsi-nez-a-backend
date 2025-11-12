@@ -15,19 +15,19 @@ services:
       timeout: 5s
       retries: 5
 
-  # app:
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #   build: 
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   environment:
-  #     # - DATABASE_URL=postgresql://POSTGRES_USER:POSTGRES_PASSWORD@localhost:5432/POSTGRES_DB
-  #     - DATABASE_URL=postgresql://myuser:mysecretpassword@localhost:5432/myapp
-  #   volumes:
-  #     - .:/app
-  #   working_dir: /app
+  app:
+    depends_on:
+      postgres:
+        condition: service_healthy
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      # - DATABASE_URL=postgresql://POSTGRES_USER:POSTGRES_PASSWORD@localhost:5432/POSTGRES_DB
+      - DATABASE_URL=postgresql://myuser:mysecretpassword@localhost:5432/myapp
+    volumes:
+      - .:/app
+    working_dir: /app
 
 volumes:
   postgres-data:
