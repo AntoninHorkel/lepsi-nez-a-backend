@@ -48,6 +48,7 @@ curl -X GET http://localhost:6767/quiz
 echo -e "\n"
 echo "Testing get_guiz:"
 curl -X GET http://localhost:6767/quiz/$quiz_id
+echo -e "\n"
 echo "Testing update_quiz:"
 echo "TODO"
 echo -e "\n"

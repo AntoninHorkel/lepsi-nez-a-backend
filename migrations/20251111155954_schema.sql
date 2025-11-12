@@ -30,7 +30,7 @@ CREATE TABLE team_answers (
     question_id UUID NOT NULL REFERENCES questions(id),
     answer_id UUID NOT NULL REFERENCES answers(id),
     team INTEGER NOT NULL,
-    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
+    submitted_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Indexes for performance

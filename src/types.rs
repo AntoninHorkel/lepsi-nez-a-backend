@@ -52,15 +52,15 @@ pub mod request {
         pub isCorrect: bool,
     }
 
+    pub type QuizInstanceState = crate::types::QuizInstanceState;
+
     #[allow(non_snake_case)]
     #[derive(Debug, Deserialize)]
     pub struct QuizInstanceAnswer {
-        pub team: usize,
         pub questionId: Uuid,
         pub answerId: Uuid,
+        pub team: u32,
     }
-
-    pub type QuizInstanceState = crate::types::QuizInstanceState;
 }
 
 pub mod response {
@@ -95,26 +95,35 @@ pub mod response {
         pub quizId: Uuid,
         pub state: crate::types::QuizInstanceState,
     }
+
+    #[allow(non_snake_case)]
+    #[derive(Debug, Serialize)]
+    pub struct QuizInstanceAnswer {
+        pub id: Uuid,
+        pub questionId: Uuid,
+        pub answerId: Uuid,
+        pub team: u32,
+    }
 }
 
 pub mod sql {
-    use serde::Deserialize;
+    use sqlx::{FromRow, types::time::OffsetDateTime};
     use uuid::Uuid;
 
-    #[derive(Debug, Deserialize, sqlx::FromRow)]
+    #[derive(Debug, FromRow)]
     pub struct Quiz {
         pub id: Uuid,
         pub name: String,
     }
 
-    #[derive(Debug, Deserialize, sqlx::FromRow)]
+    #[derive(Debug, FromRow)]
     pub struct Question {
         pub id: Uuid,
         pub quiz_id: Uuid,
         pub text: String,
     }
 
-    #[derive(Debug, Deserialize, sqlx::FromRow)]
+    #[derive(Debug, FromRow)]
     pub struct Answer {
         pub id: Uuid,
         pub question_id: Uuid,
@@ -122,11 +131,21 @@ pub mod sql {
         pub is_correct: bool,
     }
 
-    #[derive(Debug, Deserialize, sqlx::FromRow)]
+    #[derive(Debug, FromRow)]
     pub struct QuizInstance {
         #[allow(unused)]
         pub id: Uuid,
         pub quiz_id: Uuid,
         pub state: crate::types::QuizInstanceState,
+    }
+
+    #[derive(Debug, FromRow)]
+    pub struct QuizInstanceAnswer {
+        pub id: Uuid,
+        pub instance_id: Uuid,
+        pub question_id: Uuid,
+        pub answer_id: Uuid,
+        pub team: i32,
+        pub submitted_at: OffsetDateTime,
     }
 }
