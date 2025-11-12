@@ -1,6 +1,6 @@
 # Lepší než áčko backend
 
-## POST /quiz
+## POST `/quiz`
 
 Create quiz
 
@@ -30,7 +30,7 @@ Create quiz
 - HTTP 201 (CREATED): <uuid string>
 - HTTP 500 (INTERNAL SERVER ERROR): <error string>
 
-## GET /quiz
+## GET `/quiz`
 
 Get all quizzes
 
@@ -44,6 +44,7 @@ Get all quizzes
         ```json
         [
           {
+            "id": <uuid string>,
             "name": <string>,
             "questions": [
               {
@@ -63,7 +64,7 @@ Get all quizzes
         ```
 - HTTP 500 (INTERNAL SERVER ERROR): <error string>
 
-## GET /quiz/<id>
+## GET `/quiz/<id>`
 
 Get quiz by ID
 
@@ -76,6 +77,7 @@ Get quiz by ID
     - Structure:
         ```json
         {
+          "id": <uuid string>,
           "name": <string>,
           "questions": [
             {
@@ -95,7 +97,7 @@ Get quiz by ID
 - HTTP 404 (NOT FOUND): <error string>
 - HTTP 500 (INTERNAL SERVER ERROR): <error string>
 
-## POST /quiz/<id>
+## POST `/quiz/<id>`
 
 Update quiz with ID
 
@@ -126,7 +128,7 @@ Update quiz with ID
 - HTTP 404 (NOT FOUND): <error string>
 - HTTP 500 (INTERNAL SERVER ERROR): <error string>
 
-## DELETE /quiz/<id>
+## DELETE `/quiz/<id>`
 
 Delete quiz with ID
 
@@ -138,7 +140,7 @@ Delete quiz with ID
 - HTTP 404 (NOT FOUND): <error string>
 - HTTP 500 (INTERNAL SERVER ERROR): <error string>
 
-## POST /quiz/<id>/instance
+## POST `/quiz/<id>/instance`
 
 Create quiz instance
 
@@ -150,7 +152,7 @@ Create quiz instance
 - HTTP 404 (NOT FOUND): <error string>
 - HTTP 500 (INTERNAL SERVER ERROR): <error string>
 
-## GET /quiz/instance/<id>
+## GET `/quiz/instance/<id>`
 
 Get quiz instance by ID
 
@@ -163,14 +165,14 @@ Get quiz instance by ID
     - Structure:
         ```json
         {
-          "quiz_id": <uuid string>,
+          "quizId": <uuid string>,
           "state": <"active", "completed" or "paused">
         }
         ```
 - HTTP 404 (NOT FOUND): <error string>
 - HTTP 500 (INTERNAL SERVER ERROR): <error string>
 
-## DELETE /quiz/instance/<id>
+## DELETE `/quiz/instance/<id>`
 
 Delete quiz instance with ID
 
@@ -182,7 +184,7 @@ Delete quiz instance with ID
 - HTTP 404 (NOT FOUND): <error string>
 - HTTP 500 (INTERNAL SERVER ERROR): <error string>
 
-## POST /quiz/instance/<id>/state
+## POST `/quiz/instance/<id>/state`
 
 Update quiz instance state
 
@@ -196,7 +198,7 @@ Update quiz instance state
 - HTTP 404 (NOT FOUND): <error string>
 - HTTP 500 (INTERNAL SERVER ERROR): <error string>
 
-## POST /quiz/instance/<id>/answer
+## POST `/quiz/instance/<id>/answer`
 
 Post answer
 
@@ -207,8 +209,8 @@ Post answer
     ```json
     {
       "team": <integer>,
-      "question_id": <uuid string>,
-      "answer_id": <uuid string>
+      "questionId": <uuid string>,
+      "answerId": <uuid string>
     }
     ```
 

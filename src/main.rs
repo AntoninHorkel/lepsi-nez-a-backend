@@ -1,4 +1,3 @@
-mod payloads;
 mod types;
 
 use std::{env, error::Error};
@@ -10,11 +9,10 @@ use axum::{
     response::IntoResponse,
     routing,
 };
-use payloads::{CreateInstancePayload, CreateQuizPayload, PostAnswerPayload, UpdateInstanceStatePayload};
 use sqlx::postgres::PgPool;
 use tokio::net::TcpListener;
 #[allow(unused_imports)] // Are you happy now, rust-analyzer?
-use types::{Answer, AnswerSQL, Question, QuestionSQL, Quiz, QuizSQL};
+use types::{request, response, sql};
 use uuid::Uuid;
 
 #[tokio::main]
@@ -43,7 +41,7 @@ where
 
 type HandlerResult<T> = Result<(StatusCode, T), (StatusCode, String)>;
 
-async fn create_quiz(State(pool): State<PgPool>, Json(payload): Json<CreateQuizPayload>) -> HandlerResult<String> {
+async fn create_quiz(State(pool): State<PgPool>, Json(payload): Json<request::Quiz>) -> HandlerResult<String> {
     // let mut tx = pool.begin().await.map_err(internal_error)?;
     let quiz_id = sqlx::query!("INSERT INTO quizzes (name) VALUES ($1) RETURNING id", payload.name)
         .fetch_one(&pool)
@@ -72,39 +70,42 @@ async fn create_quiz(State(pool): State<PgPool>, Json(payload): Json<CreateQuizP
     Ok((StatusCode::CREATED, quiz_id.to_string()))
 }
 
-async fn get_all_quizzes(State(pool): State<PgPool>) -> HandlerResult<Json<Vec<Quiz>>> {
+async fn get_all_quizzes(State(pool): State<PgPool>) -> HandlerResult<Json<Vec<response::Quiz>>> {
     // let mut tx = pool.begin().await.map_err(internal_error)?;
     let quizzes =
-        sqlx::query_as!(QuizSQL, "SELECT id, name FROM quizzes").fetch_all(&pool).await.map_err(internal_error)?;
-    let questions = sqlx::query_as!(QuestionSQL, "SELECT id, quiz_id, text FROM questions")
+        sqlx::query_as!(sql::Quiz, "SELECT id, name FROM quizzes").fetch_all(&pool).await.map_err(internal_error)?;
+    let questions = sqlx::query_as!(sql::Question, "SELECT id, quiz_id, text FROM questions")
         .fetch_all(&pool)
         .await
         .map_err(internal_error)?;
-    let answers = sqlx::query_as!(AnswerSQL, "SELECT id, question_id, text, is_correct FROM answers")
+    let answers = sqlx::query_as!(sql::Answer, "SELECT id, question_id, text, is_correct FROM answers")
         .fetch_all(&pool)
         .await
         .map_err(internal_error)?;
     let mut result = Vec::new();
     for quiz in quizzes {
-        let quiz_questions: Vec<Question> = questions
+        let quiz_questions: Vec<response::Question> = questions
             .iter()
             .filter(|q| q.quiz_id == quiz.id)
             .map(|q| {
-                let question_answers: Vec<Answer> = answers
+                let question_answers: Vec<response::Answer> = answers
                     .iter()
                     .filter(|a| a.question_id == q.id)
-                    .map(|a| Answer {
+                    .map(|a| response::Answer {
+                        id: a.id,
                         text: a.text.clone(),
                         isCorrect: a.is_correct,
                     })
                     .collect();
-                Question {
+                response::Question {
+                    id: q.id,
                     text: q.text.clone(),
                     answers: question_answers,
                 }
             })
             .collect();
-        result.push(Quiz {
+        result.push(response::Quiz {
+            id: quiz.id,
             name: quiz.name,
             questions: quiz_questions,
         });
@@ -112,44 +113,48 @@ async fn get_all_quizzes(State(pool): State<PgPool>) -> HandlerResult<Json<Vec<Q
     Ok((StatusCode::OK, Json(result)))
 }
 
-async fn get_quiz(State(pool): State<PgPool>, Path(quiz_id): Path<Uuid>) -> HandlerResult<Json<Quiz>> {
+async fn get_quiz(State(pool): State<PgPool>, Path(quiz_id): Path<Uuid>) -> HandlerResult<Json<response::Quiz>> {
     // let mut tx = pool.begin().await.map_err(internal_error)?;
-    let quiz = sqlx::query_as!(QuizSQL, "SELECT id, name FROM quizzes WHERE id = $1", quiz_id)
+    let quiz = sqlx::query_as!(sql::Quiz, "SELECT id, name FROM quizzes WHERE id = $1", quiz_id)
         .fetch_optional(&pool)
         .await
         .map_err(internal_error)?
         .ok_or((StatusCode::NOT_FOUND, "Quiz not found".to_owned()))?;
-    let questions = sqlx::query_as!(QuestionSQL, "SELECT id, quiz_id, text FROM questions WHERE quiz_id = $1", quiz_id)
-        .fetch_all(&pool)
-        .await
-        .map_err(internal_error)?;
+    let questions =
+        sqlx::query_as!(sql::Question, "SELECT id, quiz_id, text FROM questions WHERE quiz_id = $1", quiz_id)
+            .fetch_all(&pool)
+            .await
+            .map_err(internal_error)?;
     let question_ids: Vec<Uuid> = questions.iter().map(|q| q.id).collect();
     let answers = sqlx::query_as!(
-        AnswerSQL,
+        sql::Answer,
         "SELECT id, question_id, text, is_correct FROM answers WHERE question_id = ANY($1)",
         &question_ids
     )
     .fetch_all(&pool)
     .await
     .map_err(internal_error)?;
-    let quiz_questions: Vec<Question> = questions
+    let quiz_questions: Vec<response::Question> = questions
         .iter()
         .map(|q| {
-            let question_answers: Vec<Answer> = answers
+            let question_answers: Vec<response::Answer> = answers
                 .iter()
                 .filter(|a| a.question_id == q.id)
-                .map(|a| Answer {
+                .map(|a| response::Answer {
+                    id: a.id,
                     text: a.text.clone(),
                     isCorrect: a.is_correct,
                 })
                 .collect();
-            Question {
+            response::Question {
+                id: q.id,
                 text: q.text.clone(),
                 answers: question_answers,
             }
         })
         .collect();
-    let result = Quiz {
+    let result = response::Quiz {
+        id: quiz.id,
         name: quiz.name,
         questions: quiz_questions,
     };
@@ -159,7 +164,7 @@ async fn get_quiz(State(pool): State<PgPool>, Path(quiz_id): Path<Uuid>) -> Hand
 async fn update_quiz(
     State(pool): State<PgPool>,
     Path(quiz_id): Path<Uuid>,
-    Json(payload): Json<CreateQuizPayload>,
+    Json(payload): Json<request::Quiz>,
 ) -> impl IntoResponse {
     // TODO
     drop(pool);
@@ -175,15 +180,10 @@ async fn delete_quiz(State(pool): State<PgPool>, Path(quiz_id): Path<Uuid>) -> i
     (StatusCode::OK, Json(()))
 }
 
-async fn create_instance(
-    State(pool): State<PgPool>,
-    Path(quiz_id): Path<Uuid>,
-    Json(payload): Json<CreateInstancePayload>,
-) -> impl IntoResponse {
+async fn create_instance(State(pool): State<PgPool>, Path(quiz_id): Path<Uuid>) -> impl IntoResponse {
     // TODO
     drop(pool);
     println!("{quiz_id:#?}");
-    println!("{payload:#?}");
     (StatusCode::CREATED, Json(()))
 }
 
@@ -204,7 +204,7 @@ async fn delete_instance(State(pool): State<PgPool>, Path(instance_id): Path<Uui
 async fn update_instance_state(
     State(pool): State<PgPool>,
     Path(instance_id): Path<Uuid>,
-    Json(payload): Json<UpdateInstanceStatePayload>,
+    Json(payload): Json<request::QuizInstanceState>,
 ) -> HandlerResult<()> {
     // TODO
     drop(pool);
@@ -216,7 +216,7 @@ async fn update_instance_state(
 async fn post_answer(
     State(pool): State<PgPool>,
     Path(instance_id): Path<Uuid>,
-    Json(payload): Json<PostAnswerPayload>,
+    Json(payload): Json<request::QuizInstanceAnswer>,
 ) -> impl IntoResponse {
     // TODO
     drop(pool);
