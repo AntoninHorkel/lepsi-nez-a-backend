@@ -8,6 +8,17 @@ pub enum QuizInstanceState {
     paused,
 }
 
+impl From<String> for QuizInstanceState {
+    fn from(value: String) -> Self {
+        return match value.as_str() {
+            "active" => Self::active,
+            "completed" => Self::completed,
+            "paused" => Self::paused,
+            _ => Self::active, // TODO
+        };
+    }
+}
+
 pub mod request {
     use serde::Deserialize;
     use uuid::Uuid;
@@ -103,8 +114,9 @@ pub mod sql {
 
     #[derive(Debug, Deserialize, sqlx::FromRow)]
     pub struct QuizInstance {
+        #[allow(unused)]
         pub id: Uuid,
         pub quiz_id: Uuid,
-        pub state: String, // TODO: Could this be `crate::types::QuizInstanceState` directly?
+        pub state: crate::types::QuizInstanceState,
     }
 }

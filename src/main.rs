@@ -196,11 +196,23 @@ async fn create_instance(State(pool): State<PgPool>, Path(quiz_id): Path<Uuid>) 
     Ok((StatusCode::CREATED, instance_id.to_string()))
 }
 
-async fn get_instance(State(pool): State<PgPool>, Path(instance_id): Path<Uuid>) -> HandlerResult<Json<()>> {
-    // TODO
-    drop(pool);
-    println!("{instance_id:#?}");
-    Ok((StatusCode::OK, Json(())))
+async fn get_instance(
+    State(pool): State<PgPool>,
+    Path(instance_id): Path<Uuid>,
+) -> HandlerResult<Json<response::QuizInstance>> {
+    let instance =
+        sqlx::query_as!(sql::QuizInstance, "SELECT id, quiz_id, state FROM quiz_instances WHERE id = $1", instance_id)
+            .fetch_optional(&pool)
+            .await
+            .map_err(internal_error)?
+            .ok_or((StatusCode::NOT_FOUND, "Quiz not found".to_owned()))?;
+    Ok((
+        StatusCode::OK,
+        Json(response::QuizInstance {
+            quizId: instance.quiz_id,
+            state: instance.state,
+        }),
+    ))
 }
 
 async fn delete_instance(State(pool): State<PgPool>, Path(instance_id): Path<Uuid>) -> HandlerResult<Json<()>> {

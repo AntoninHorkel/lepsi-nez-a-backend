@@ -55,10 +55,11 @@ echo "Testing delete_quiz:"
 echo "TODO"
 echo -e "\n"
 echo "Testing create_instance:"
-curl -X POST http://localhost:6767/quiz/$quiz_id/instance
+instance_id=$(curl -X POST http://localhost:6767/quiz/$quiz_id/instance)
+echo $instance_id
 echo -e "\n"
 echo "Testing get_instance:"
-echo "TODO"
+curl -X GET http://localhost:6767/quiz/instance/$instance_id
 echo -e "\n"
 echo "Testing delete_instance:"
 echo "TODO"
