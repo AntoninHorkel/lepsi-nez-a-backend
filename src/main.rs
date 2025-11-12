@@ -150,8 +150,15 @@ async fn update_quiz(
 }
 
 async fn delete_quiz(State(pool): State<PgPool>, Path(quiz_id): Path<Uuid>) -> HandlerResult<Json<()>> {
-    // TODO
-    drop(pool);
+    let resp = sqlx::query("DELETE FROM quizzes WHERE id = $1")
+        .bind(quiz_id)
+        .execute(&pool)
+        .await
+        .map_err(internal_error)?
+        .rows_affected();
+    if resp > 0 {
+        Ok((StatusCode::NOT_FOUND, Json(())))
+    }
     println!("{quiz_id:#?}");
     Ok((StatusCode::OK, Json(())))
 }
@@ -182,6 +189,7 @@ async fn get_instance(State(pool): State<PgPool>, Path(instance_id): Path<Uuid>)
 async fn delete_instance(State(pool): State<PgPool>, Path(instance_id): Path<Uuid>) -> HandlerResult<Json<()>> {
     // TODO
     let resp = sqlx::query("DELETE FROM quiz_instances WHERE id = $1")
+        .bind(instance_id)
         .execute(&pool)
         .await
         .map_err(internal_error)?
