@@ -24,6 +24,15 @@ CREATE TABLE quiz_instances (
     state TEXT NOT NULL CHECK (state IN ('active', 'completed', 'paused'))
 );
 
+CREATE TABLE team_answers (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    instance_id UUID NOT NULL REFERENCES quiz_instances(id),
+    question_id UUID NOT NULL REFERENCES questions(id),
+    team INTEGER NOT NULL,
+    answer_id UUID NOT NULL REFERENCES answers(id),
+    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
+);
+
 -- Indexes for performance
 CREATE INDEX idx_questions_quiz_id ON questions(quiz_id);
 CREATE INDEX idx_answers_question_id ON answers(question_id);
