@@ -59,7 +59,7 @@ pub mod request {
     pub struct QuizInstanceAnswer {
         pub questionId: Uuid,
         pub answerId: Uuid,
-        pub team: u32,
+        pub team: i32,
     }
 }
 
@@ -102,7 +102,8 @@ pub mod response {
         pub id: Uuid,
         pub questionId: Uuid,
         pub answerId: Uuid,
-        pub team: u32,
+        pub team: i32,
+        pub submittedAt: String,
     }
 }
 

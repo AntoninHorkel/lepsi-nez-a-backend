@@ -214,8 +214,9 @@ Get all answers
             {
               "id": <uuid string>,
               "questionId": <uuid string>,
-              "answerId": <uuid string>
+              "answerId": <uuid string>,
               "team": <integer>,
+              "submittedAt": <datetime string>
             }
         ]
         ```
@@ -233,8 +234,8 @@ Post answer
     ```json
     {
       "questionId": <uuid string>,
-      "answerId": <uuid string>
-      "team": <integer>,
+      "answerId": <uuid string>,
+      "team": <integer>
     }
     ```
 

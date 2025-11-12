@@ -60,7 +60,7 @@ async fn create_quiz(State(pool): State<PgPool>, Json(payload): Json<request::Qu
                 "INSERT INTO answers (question_id, text, is_correct) VALUES ($1, $2, $3)",
                 question_id,
                 answer.text,
-                answer.isCorrect
+                answer.isCorrect,
             )
             .execute(&pool)
             .await
@@ -248,11 +248,32 @@ async fn update_instance_state(
     }
 }
 
-async fn get_all_answers(State(pool): State<PgPool>, Path(instance_id): Path<Uuid>) -> HandlerResult<Json<()>> {
-    // TODO
-    drop(pool);
-    println!("{instance_id:#?}");
-    Ok((StatusCode::OK, Json(())))
+async fn get_all_answers(
+    State(pool): State<PgPool>,
+    Path(instance_id): Path<Uuid>,
+) -> HandlerResult<Json<Vec<response::QuizInstanceAnswer>>> {
+    let answers = sqlx::query_as!(
+        sql::QuizInstanceAnswer,
+        "SELECT id, instance_id, question_id, answer_id, team, submitted_at FROM team_answers WHERE instance_id = $1",
+        instance_id,
+    )
+    .fetch_all(&pool)
+    .await
+    .map_err(internal_error)?
+    .into_iter()
+    .map(|answer| response::QuizInstanceAnswer {
+        id: answer.id,
+        questionId: answer.question_id,
+        answerId: answer.answer_id,
+        team: answer.team,
+        submittedAt: answer.submitted_at.to_string(),
+    })
+    .collect::<Vec<_>>();
+    if answers.len() == 0 {
+        Err((StatusCode::NOT_FOUND, "Quiz instance not found".to_owned()))
+    } else {
+        Ok((StatusCode::OK, Json(answers)))
+    }
 }
 
 async fn post_answer(
@@ -261,11 +282,11 @@ async fn post_answer(
     Json(payload): Json<request::QuizInstanceAnswer>,
 ) -> HandlerResult<()> {
     let resp = sqlx::query!(
-        "INSERT INTO team_answers (instance_id, question_id, team, answer_id) VALUES ($1, $2, $3, $4)",
+        "INSERT INTO team_answers (instance_id, question_id, answer_id, team) VALUES ($1, $2, $3, $4)",
         instance_id,
         payload.questionId,
+        payload.answerId,
         payload.team,
-        payload.answerId
     )
     .execute(&pool)
     .await
