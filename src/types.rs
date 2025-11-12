@@ -55,7 +55,7 @@ pub mod request {
     #[allow(non_snake_case)]
     #[derive(Debug, Deserialize)]
     pub struct QuizInstanceAnswer {
-        pub team: usize,
+        pub team: i32,
         pub questionId: Uuid,
         pub answerId: Uuid,
     }

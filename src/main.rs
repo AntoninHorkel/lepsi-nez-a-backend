@@ -252,10 +252,21 @@ async fn post_answer(
     State(pool): State<PgPool>,
     Path(instance_id): Path<Uuid>,
     Json(payload): Json<request::QuizInstanceAnswer>,
-) -> HandlerResult<Json<()>> {
-    // TODO
-    drop(pool);
-    println!("{instance_id:#?}");
-    println!("{payload:#?}");
-    Ok((StatusCode::OK, Json(())))
+) -> HandlerResult<()> {
+    let resp = sqlx::query!(
+        "INSERT INTO team_answers (instance_id, question_id, team, answer_id) VALUES ($1, $2, $3, $4)",
+        instance_id,
+        payload.questionId,
+        payload.team,
+        payload.answerId
+    )
+    .execute(&pool)
+    .await
+    .map_err(internal_error)?
+    .rows_affected();
+    if resp == 0 {
+        Err((StatusCode::NOT_FOUND, "Quiz instance not found".to_owned()))
+    } else {
+        Ok((StatusCode::OK, ()))
+    }
 }
