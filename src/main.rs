@@ -91,24 +91,12 @@ async fn get_all_quizzes(State(pool): State<PgPool>) -> HandlerResult<Json<Vec<r
                 let question_answers: Vec<response::Answer> = answers
                     .iter()
                     .filter(|a| a.question_id == q.id)
-                    .map(|a| response::Answer {
-                        id: a.id,
-                        text: a.text.clone(),
-                        isCorrect: a.is_correct,
-                    })
+                    .map(|a| response::Answer { id: a.id, text: a.text.clone(), isCorrect: a.is_correct })
                     .collect();
-                response::Question {
-                    id: q.id,
-                    text: q.text.clone(),
-                    answers: question_answers,
-                }
+                response::Question { id: q.id, text: q.text.clone(), answers: question_answers }
             })
             .collect();
-        result.push(response::Quiz {
-            id: quiz.id,
-            name: quiz.name,
-            questions: quiz_questions,
-        });
+        result.push(response::Quiz { id: quiz.id, name: quiz.name, questions: quiz_questions });
     }
     Ok((StatusCode::OK, Json(result)))
 }
@@ -140,24 +128,12 @@ async fn get_quiz(State(pool): State<PgPool>, Path(quiz_id): Path<Uuid>) -> Hand
             let question_answers: Vec<response::Answer> = answers
                 .iter()
                 .filter(|a| a.question_id == q.id)
-                .map(|a| response::Answer {
-                    id: a.id,
-                    text: a.text.clone(),
-                    isCorrect: a.is_correct,
-                })
+                .map(|a| response::Answer { id: a.id, text: a.text.clone(), isCorrect: a.is_correct })
                 .collect();
-            response::Question {
-                id: q.id,
-                text: q.text.clone(),
-                answers: question_answers,
-            }
+            response::Question { id: q.id, text: q.text.clone(), answers: question_answers }
         })
         .collect();
-    let result = response::Quiz {
-        id: quiz.id,
-        name: quiz.name,
-        questions: quiz_questions,
-    };
+    let result = response::Quiz { id: quiz.id, name: quiz.name, questions: quiz_questions };
     Ok((StatusCode::OK, Json(result)))
 }
 
@@ -205,7 +181,14 @@ async fn get_instance(State(pool): State<PgPool>, Path(instance_id): Path<Uuid>)
 
 async fn delete_instance(State(pool): State<PgPool>, Path(instance_id): Path<Uuid>) -> HandlerResult<Json<()>> {
     // TODO
-    drop(pool);
+    let resp = sqlx::query("DELETE FROM quiz_instances WHERE id = $1")
+        .execute(&pool)
+        .await
+        .map_err(internal_error)?
+        .rows_affected();
+    if resp > 0 {
+        Ok((StatusCode::NOT_FOUND, Json(())))
+    }
     println!("{instance_id:#?}");
     Ok((StatusCode::OK, Json(())))
 }
