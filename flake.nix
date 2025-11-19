@@ -37,13 +37,15 @@
           overlays = [ (import rust-overlay) ];
         };
         rustToolchain = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
+        rustToolchainSlim = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain-slim.toml;
         craneLib = (crane.mkLib pkgs).overrideToolchain rustToolchain;
+        craneLibSlim = (crane.mkLib pkgs).overrideToolchain rustToolchainSlim;
         # https://github.com/ipetkov/crane/blob/master/lib/cleanCargoSource.nix
         # src = pkgs.lib.cleanSourceWith {
         #   src = pkgs.lib.cleanSource ./.;
         #   # TODO: Fix regex!
         #   filter =
-        #     path: type: (builtins.match ".*src\/.*" path != null) || (craneLib.filterCargoSources path type);
+        #     path: type: (builtins.match ".*src\/.*" path != null) || (craneLibSlim.filterCargoSources path type);
         #   name = "source";
         # };
         src =
@@ -51,7 +53,7 @@
           lib.fileset.toSource {
             root = ./.;
             fileset = lib.fileset.unions [
-              (craneLib.fileset.commonCargoSources ./.)
+              (craneLibSlim.fileset.commonCargoSources ./.)
               ./migrations
             ];
           };
@@ -73,11 +75,11 @@
             sqlx database setup
           '';
         };
-        cargoArtifactsDebug = craneLib.buildDepsOnly commonArgsDebug;
-        debug = craneLib.buildPackage (
+        cargoArtifactsDebug = craneLibSlim.buildDepsOnly commonArgsDebug;
+        debug = craneLibSlim.buildPackage (
           commonArgsDebug // commonArgsBuild // { inherit cargoArtifactsDebug; }
         );
-        release = craneLib.buildPackage (commonArgs // commonArgsBuild // { profile = "release"; });
+        release = craneLibSlim.buildPackage (commonArgs // commonArgsBuild // { profile = "release"; });
       in
       {
         checks = {
@@ -100,16 +102,22 @@
           inherit debug release;
           default = release;
         };
-        devShells.default = craneLib.devShell {
-          checks = self.checks.${system};
-          packages = with pkgs; [
-            bacon
-            nixfmt-tree
-            pre-commit
-            sqlx-cli
-          ];
-          shellHook = "pre-commit install";
-          RUST_BACKTRACE = 1;
+        devShells = {
+          default = craneLib.devShell {
+            checks = self.checks.${system};
+            packages = with pkgs; [
+              bacon
+              nixfmt-tree
+              pre-commit
+              sqlx-cli
+            ];
+            shellHook = "pre-commit install";
+            RUST_BACKTRACE = 1;
+          };
+          slim = craneLibSlim.devShell {
+            packages = [ pkgs.sqlx-cli ];
+            RUST_BACKTRACE = 1;
+          };
         };
         formatter = pkgs.nixfmt-tree;
       }
