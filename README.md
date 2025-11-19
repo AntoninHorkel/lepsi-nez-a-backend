@@ -253,7 +253,5 @@ Get all answers
 ## Hard-reset database
 
 ```sh
-docker compose down -v
-docker compose up -d
-sqlx migrate run
+sqlx database reset
 ```

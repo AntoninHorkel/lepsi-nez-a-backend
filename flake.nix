@@ -39,16 +39,24 @@
         rustToolchain = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
         craneLib = (crane.mkLib pkgs).overrideToolchain rustToolchain;
         # https://github.com/ipetkov/crane/blob/master/lib/cleanCargoSource.nix
-        src = pkgs.lib.cleanSourceWith {
-          src = pkgs.lib.cleanSource ./.;
-          # TODO: Fix regex!
-          filter =
-            path: type: (builtins.match ".*src\/.*" path != null) || (craneLib.filterCargoSources path type);
-          name = "source";
-        };
-        buildInputs = [ ];
+        # src = pkgs.lib.cleanSourceWith {
+        #   src = pkgs.lib.cleanSource ./.;
+        #   # TODO: Fix regex!
+        #   filter =
+        #     path: type: (builtins.match ".*src\/.*" path != null) || (craneLib.filterCargoSources path type);
+        #   name = "source";
+        # };
+        src =
+          with pkgs;
+          lib.fileset.toSource {
+            root = ./.;
+            fileset = lib.fileset.unions [
+              (craneLib.fileset.commonCargoSources ./.)
+              ./migrations
+            ];
+          };
         commonArgs = {
-          inherit src buildInputs;
+          inherit src;
           strictDeps = true;
           # TODO: Set Cargo profile the default way.
           cargoBuildCommand = "cargo build --profile $profile";
@@ -58,9 +66,18 @@
         commonArgsDebug = commonArgs // {
           profile = "dev";
         };
+        commonArgsBuild = {
+          nativeBuildInputs = [ pkgs.sqlx-cli ];
+          preBuild = ''
+            export DATABASE_URL=postgresql:./db.pg
+            sqlx database setup
+          '';
+        };
         cargoArtifactsDebug = craneLib.buildDepsOnly commonArgsDebug;
-        debug = craneLib.buildPackage (commonArgsDebug // { inherit cargoArtifactsDebug; });
-        release = craneLib.buildPackage (commonArgs // { profile = "release"; });
+        debug = craneLib.buildPackage (
+          commonArgsDebug // commonArgsBuild // { inherit cargoArtifactsDebug; }
+        );
+        release = craneLib.buildPackage (commonArgs // commonArgsBuild // { profile = "release"; });
       in
       {
         checks = {
@@ -93,7 +110,6 @@
           ];
           shellHook = "pre-commit install";
           RUST_BACKTRACE = 1;
-          NIX_ENFORCE_NO_NATIVE = 0;
         };
         formatter = pkgs.nixfmt-tree;
       }
